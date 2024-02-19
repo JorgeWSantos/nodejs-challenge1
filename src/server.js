@@ -10,11 +10,10 @@ const server = createServer(async (req, res) => {
 
     const route = routes.find(r => r.method === method && r.path === url)
 
-    console.log(method, url)
-
     if (route) {
         return route.handler(req, res);
     }
+
     res.writeHead(400).end(JSON.stringify({ success: false }))
 });
 
