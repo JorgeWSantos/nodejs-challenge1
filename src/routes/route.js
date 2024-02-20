@@ -18,16 +18,52 @@ export const routes = [
         method: 'POST',
         path: buildRoutePath('/tasks'),
         handler: (req, res) => {
-            console.log('req.body', req.body)
-            const { title } = req.body
+            const { title, description } = req.body
+
+            const now = Date.now();
 
             const task = {
                 id: randomUUID(),
                 title,
+                description,
+                completed_at: null,
+                created_at: now,
+                updated_at: now,
             }
 
-            database.insert(table, task)
-            return res.writeHead(200).end('POST Tasks')
+            const taskCreated = database.insert(table, task)
+            return res.writeHead(200).end(JSON.stringify(taskCreated))
+        }
+    },
+    {
+        method: 'PUT',
+        path: buildRoutePath('/tasks/:id'),
+        handler: (req, res) => {
+            const { id } = req.params;
+            const { title, description } = req.body;
+
+            if (!title && !description)
+                return res.writeHead(404)
+                    .end(
+                        JSON.stringify({ mensagem: 'title ou description são parâmetros necessários' })
+                    )
+
+            const now = Date.now();
+
+            const taskUpdated = database.update(
+                table,
+                id,
+                {
+                    title,
+                    description,
+                    updated_at: now
+                }
+            )
+
+            if (taskUpdated)
+                return res.writeHead(200).end(JSON.stringify(taskUpdated))
+
+            return res.writeHead(404).end()
         }
     },
     {
@@ -35,8 +71,13 @@ export const routes = [
         path: buildRoutePath('/tasks/:id'),
         handler: (req, res) => {
             const { id } = req.params;
-            database.delete(table, id)
-            return res.writeHead(200).end('DELETE Tasks')
+            const taskDeleted = database.delete(table, id)
+
+            if (taskDeleted) {
+                return res.writeHead(204).end()
+            }
+
+            return res.writeHead(404).end('Task Not Found')
         }
     }
 ]
