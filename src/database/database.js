@@ -23,7 +23,7 @@ export class Database {
 
     insert(table, data) {
         if (Array.isArray(this.#database[table]))
-            this.#database[table].push()
+            this.#database[table].push(data)
         else
             this.#database[table] = [data]
 
@@ -31,10 +31,35 @@ export class Database {
     }
 
     delete(table, id) {
-
-        const rowIndex = this.#database[table].findIndex(row => row.id === id)
+        const rowIndex = this.#database[table]
+            ? this.#database[table].findIndex(row => row.id === id)
+            : -1
 
         if (rowIndex > -1)
             this.#database[table].splice(rowIndex, 1)
+    }
+
+    update(table, id, data) {
+        const rowIndex = this.#database[table]
+            ? this.#database[table].findIndex(row => row.id === id)
+            : -1
+
+        if (rowIndex > -1) {
+            const task = this.#database[table][rowIndex];
+
+            const newTask = {
+                ...task,
+                id,
+                title: data.title ?? task.title,
+                description: data.description ?? task.description,
+                updated_at: data.updated_at
+            }
+
+            this.#database[table][rowIndex] = newTask
+
+            return newTask
+        }
+
+        return null
     }
 }
