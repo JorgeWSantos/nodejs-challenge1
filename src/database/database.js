@@ -27,6 +27,8 @@ export class Database {
         else
             this.#database[table] = [data]
 
+        this.#persist()
+
         return data
     }
 
@@ -35,8 +37,10 @@ export class Database {
             ? this.#database[table].findIndex(row => row.id === id)
             : -1
 
-        if (rowIndex > -1)
+        if (rowIndex > -1) {
             this.#database[table].splice(rowIndex, 1)
+            this.#persist()
+        }
 
         return rowIndex > -1 ? true : false
     }
@@ -58,6 +62,8 @@ export class Database {
             }
 
             this.#database[table][rowIndex] = newTask
+
+            this.#persist()
 
             return newTask
         }
