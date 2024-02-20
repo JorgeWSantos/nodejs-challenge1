@@ -17,8 +17,18 @@ export class Database {
         fs.writeFile(databasePath, JSON.stringify(this.#database))
     }
 
-    select(table) {
-        return this.#database[table] ?? []
+    select(table, search) {
+        let data = this.#database[table] ?? []
+
+        if (search) {
+            data = data.filter(row => {
+                return Object.entries(search).some(([key, value]) => {
+                    return row[key].toLowerCase().includes(value.toLowerCase())
+                })
+            })
+        }
+
+        return data
     }
 
     insert(table, data) {
@@ -58,7 +68,8 @@ export class Database {
                 id,
                 title: data.title ?? task.title,
                 description: data.description ?? task.description,
-                updated_at: data.updated_at
+                updated_at: data.updated_at,
+                completed_at: data.completed_at ?? null,
             }
 
             this.#database[table][rowIndex] = newTask
