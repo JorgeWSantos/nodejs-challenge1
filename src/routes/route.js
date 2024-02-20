@@ -10,7 +10,14 @@ export const routes = [
         method: 'GET',
         path: buildRoutePath('/tasks'),
         handler: (req, res) => {
-            const tasks = database.select(table)
+            const { search } = req.query;
+            const tasks = database.select(
+                table,
+                search ? {
+                    title: search,
+                    description: search
+                } : null)
+
             return res.writeHead(200).end(JSON.stringify(tasks))
         }
     },
@@ -48,25 +55,28 @@ export const routes = [
                         JSON.stringify({ mensagem: 'title ou description são parâmetros necessários' })
                     )
 
+            const [task] = database.select(table, { id })
+
+            if (!task)
+                return res.writeHead(404)
+                    .end(
+                        JSON.stringify({ mensagem: 'task not fount' })
+                    )
+
             const now = Date.now();
 
             const taskUpdated = database.update(
                 table,
                 id,
                 {
+                    ...task,
                     title,
                     description,
                     updated_at: now
                 }
             )
 
-            if (taskUpdated)
-                return res.writeHead(200).end(JSON.stringify(taskUpdated))
-
-            return res.writeHead(404)
-                .end(
-                    JSON.stringify({ mensagem: 'task not fount' })
-                )
+            return res.writeHead(200).end(JSON.stringify(taskUpdated))
         }
     },
     {
@@ -74,15 +84,45 @@ export const routes = [
         path: buildRoutePath('/tasks/:id'),
         handler: (req, res) => {
             const { id } = req.params;
-            const taskDeleted = database.delete(table, id)
 
-            if (taskDeleted) {
-                return res.writeHead(204).end()
-            }
+            const [task] = database.select(table, { id })
 
-            return res.writeHead(404)
+            if (!task)
+                return res.writeHead(404)
+                    .end(
+                        JSON.stringify({ mensagem: 'task not fount' })
+                    )
+
+            database.delete(table, id)
+
+            return res.writeHead(204).end()
+        }
+    },
+    {
+        method: 'PATCH',
+        path: buildRoutePath('/tasks/:id'),
+        handler: (req, res) => {
+            const { id } = req.params;
+            const { completed } = req.body;
+
+            const [task] = database.select(table, { id })
+
+            if (!task)
+                return res.writeHead(404)
+                    .end(
+                        JSON.stringify({ mensagem: 'task not fount' })
+                    )
+            const now = Date.now()
+
+            const taskUpdated = database.update(table, id, {
+                ...task,
+                id,
+                completed_at: completed ? now : null
+            })
+
+            return res.writeHead(200)
                 .end(
-                    JSON.stringify({ mensagem: 'task not fount' })
+                    JSON.stringify(taskUpdated)
                 )
         }
     }
