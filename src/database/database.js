@@ -37,6 +37,8 @@ export class Database {
 
         if (rowIndex > -1)
             this.#database[table].splice(rowIndex, 1)
+
+        return rowIndex > -1 ? true : false
     }
 
     update(table, id, data) {

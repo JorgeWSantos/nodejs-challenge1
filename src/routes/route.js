@@ -63,7 +63,10 @@ export const routes = [
             if (taskUpdated)
                 return res.writeHead(200).end(JSON.stringify(taskUpdated))
 
-            return res.writeHead(404).end()
+            return res.writeHead(404)
+                .end(
+                    JSON.stringify({ mensagem: 'task not fount' })
+                )
         }
     },
     {
@@ -77,7 +80,10 @@ export const routes = [
                 return res.writeHead(204).end()
             }
 
-            return res.writeHead(404).end('Task Not Found')
+            return res.writeHead(404)
+                .end(
+                    JSON.stringify({ mensagem: 'task not fount' })
+                )
         }
     }
 ]
