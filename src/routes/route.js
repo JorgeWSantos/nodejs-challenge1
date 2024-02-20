@@ -27,6 +27,12 @@ export const routes = [
         handler: (req, res) => {
             const { title, description } = req.body
 
+            if (!title || !description)
+                return res.writeHead(404)
+                    .end(
+                        JSON.stringify({ mensagem: 'title and description são parâmetros necessários' })
+                    )
+
             const now = Date.now();
 
             const task = {
